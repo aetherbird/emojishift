@@ -1,9 +1,34 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import sys
+import argparse
+
 interactive_mode = False
 input_parse_level = "2"
 
+argparser = argparse.ArgumentParser(description="emojishift: translate text to emoji")
+argparser.add_argument(
+    "-l", "--light", "-1", action="store_const", const="1", dest="parse_level",
+    help="light: letters and text only"
+)
+argparser.add_argument(
+    "-s", "--standard", "-2", action="store_const", const="2", dest="parse_level",
+    help="standard: apply glyphs and letters"
+)
+argparser.add_argument(
+    "-a", "--alternate", "-3", action="store_const", const="3", dest="parse_level",
+    help="alternate: apply glyphs and alternate unicode"
+)
+argparser.add_argument(
+    "-d", "--deep", "-4", action="store_const", const="4", dest="parse_level",
+    help="deep: apply maximum glyphing"
+)
+
+passedargs = argparser.parse_args()
+if passedargs.parse_level:
+    input_parse_level = passedargs.parse_level
+
+# isatty will return False if input is piped in
 if sys.stdin.isatty():
     interactive_mode = True
 else:
