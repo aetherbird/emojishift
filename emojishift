@@ -60,12 +60,12 @@ else:
 
 if interactive_mode == True:
     input_forstring = input("Define Input > ")
-    if not input_parse_level:
+    if not input_parse_level and not reverse_mode:
         input_parse_level = input(f"Select your translation level (default {default_parse_level}): ")
         print(f"\n\nTranslation Level: \n\n1. Light: Letters and text only\n2. Glyph: Glyph translations only\n3. Standard: Apply glyphs and letters\n4. Alternate: Apply glyphs and alternate unicode\n5. Deep: Apply maximum glyphing\n\n")
     string_to_shift = str(input_forstring)
 
-    if input_parse_level not in ["1", "2", "3", "4", "5"]:
+    if input_parse_level not in ["1", "2", "3", "4", "5"] and not reverse_mode:
         print(f"Invalid input, defaulting to standard parse ({default_parse_level})\n")
         input_parse_level = default_parse_level
 
@@ -428,6 +428,21 @@ def deep_parse(string_to_shift):
     for in_a, out_a in translation_dict_symbols.items():
         string_to_shift = string_to_shift.replace(in_a, out_a)
     return string_to_shift
+
+def reverse_parse(string_to_shift):
+    for in_a, out_a in main_glyph_dict_aggressive.items():
+        string_to_shift = apply_glyphs(out_a, in_a, string_to_shift)
+    for in_a, out_a in alpha_translation_dict_std.items():
+        string_to_shift = string_to_shift.replace(out_a, in_a)
+    for in_a, out_a in translation_dict_digits.items():
+        string_to_shift = string_to_shift.replace(out_a, in_a)
+    for in_a, out_a in translation_dict_symbols.items():
+        string_to_shift = string_to_shift.replace(out_a, in_a)
+    return string_to_shift
+
+if reverse_mode == True:
+    input_parse_level = "0"
+    string_to_shift = reverse_parse(string_to_shift)
 
 if input_parse_level == "1":
     string_to_shift = light_parse(string_to_shift)
