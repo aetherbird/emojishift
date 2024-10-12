@@ -9,7 +9,7 @@ reverse_mode = False
 default_parse_level = "3"
 input_parse_level = None
 
-argparser = argparse.ArgumentParser(description="emojishift: translate text to emoji")
+argparser = argparse.ArgumentParser(description="emojishift: translate text to emoji, or emoji to text")
 argparser.add_argument(
     "-l", "--light", "-1", action="store_const", const="1", dest="parse_level",
     help="light: letters and text only"
@@ -32,11 +32,7 @@ argparser.add_argument(
 )
 argparser.add_argument(
     "-r", "--reverse", action="store_true", dest="reverse",
-    help="reverse: translate from emoji to text"
-)
-argparser.add_argument(
-    "-i", "--interactive", action="store_true", dest="interactive",
-    help="interactive mode"
+    help="reverse-translate from emoji to text"
 )
 argparser.add_argument(
     "-v", "--version", action="version", version="emojishift 0.11"
@@ -49,10 +45,7 @@ if passedargs.parse_level:
 if passedargs.reverse:
     reverse_mode = True
 
-if passedargs.interactive:
-    interactive_mode = True
-
-# isatty will return False if input is piped in
+# isatty will return False if input is piped
 if sys.stdin.isatty():
     interactive_mode = True
 else:
@@ -66,7 +59,7 @@ if interactive_mode == True:
     string_to_shift = str(input_forstring)
 
     if input_parse_level not in ["1", "2", "3", "4", "5"] and not reverse_mode:
-        print(f"Invalid input, defaulting to standard parse ({default_parse_level})\n")
+        print(f"Invalid input, defaulting to standard parse level {default_parse_level}.\n")
         input_parse_level = default_parse_level
 
 alpha_translation_dict_std = {
@@ -376,6 +369,9 @@ main_glyph_dict_aggressive = {
     r"sea": "🌊"
 }
 
+if reverse_mode == False:
+    string_to_shift = string_to_shift.lower()
+
 def apply_glyphs(in_b, out_b, string_in):
     string_shift = re.sub(in_b, out_b, string_in)
     return string_shift
@@ -441,10 +437,8 @@ def reverse_parse(string_to_shift):
     return string_to_shift
 
 if reverse_mode == True:
-    input_parse_level = "0"
     string_to_shift = reverse_parse(string_to_shift)
-
-if input_parse_level == "1":
+elif input_parse_level == "1":
     string_to_shift = light_parse(string_to_shift)
 elif input_parse_level == "2":
     string_to_shift = glyph_parse(string_to_shift)
