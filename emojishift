@@ -61,6 +61,9 @@ if interactive_mode == True:
     if input_parse_level not in ["1", "2", "3", "4", "5"] and not reverse_mode:
         print(f"Invalid input, defaulting to standard parse level {default_parse_level}.\n")
         input_parse_level = default_parse_level
+else:
+    if not input_parse_level and not reverse_mode:
+        input_parse_level = default_parse_level
 
 alpha_translation_dict_std = {
     "a": "🇦",
