@@ -1,16 +1,16 @@
 # emojishift
 
-<b>A pipeable, command-line tool, for converting text to emoji, or emoji to text.</b>
+<b>A pipeable, command-line tool, for converting text to emoji, or emoji to text. 👍</b>
 
 ## Prerequisites
 
-Prerequisite packages are already standard on most current Linux distributions:
+Prerequisite packages are already standard on most current Linux distributions 🖥️:
 - <a href="https://github.com/13rac1/twemoji-color-font">SVG-OpenType</a> (or equivalent)
 - <a href="https://github.com/python/cpython">Python 3.6+</a>
 
 ## Installation
 
-Assuming you have prerequisites installed, simply add emojify to your $PATH, and ensure it is executable.
+Assuming you have prerequisites installed, simply add emojify to your $PATH, and ensure it is executable. 
 
 For system-wide usage, copy to `/usr/local/bin`:
 ```
