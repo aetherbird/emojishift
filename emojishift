@@ -2,9 +2,10 @@
 
 import sys
 import argparse
+import re
 
 interactive_mode = False
-input_parse_level = "2"
+input_parse_level = "3"
 
 argparser = argparse.ArgumentParser(description="emojishift: translate text to emoji")
 argparser.add_argument(
@@ -12,15 +13,19 @@ argparser.add_argument(
     help="light: letters and text only"
 )
 argparser.add_argument(
-    "-s", "--standard", "-2", action="store_const", const="2", dest="parse_level",
+    "-g", "--glyph", "-2", action="store_const", const="2", dest="parse_level",
+    help="glyph: glyph translations only"
+)
+argparser.add_argument(
+    "-s", "--standard", "-3", action="store_const", const="3", dest="parse_level",
     help="standard: apply glyphs and letters"
 )
 argparser.add_argument(
-    "-a", "--alternate", "-3", action="store_const", const="3", dest="parse_level",
+    "-a", "--alternate", "-4", action="store_const", const="4", dest="parse_level",
     help="alternate: apply glyphs and alternate unicode"
 )
 argparser.add_argument(
-    "-d", "--deep", "-4", action="store_const", const="4", dest="parse_level",
+    "-d", "--deep", "-5", action="store_const", const="5", dest="parse_level",
     help="deep: apply maximum glyphing"
 )
 
@@ -36,15 +41,15 @@ else:
 
 if interactive_mode == True:
     input_forstring = input("Define Input > ")
-    print(f"\n\nTranslation Level: \n\n1. Light: Letters and text only\n2. Standard: Apply glyphs and letters\n3. Alternate: Apply glyphs and alternate unicode\n4. Deep: Apply maximum glyphing\n\n")
+    print(f"\n\nTranslation Level: \n\n1. Light: Letters and text only\n2. Glyph: Glyph translations only\n3. Standard: Apply glyphs and letters\n4. Alternate: Apply glyphs and alternate unicode\n5. Deep: Apply maximum glyphing\n\n")
     input_parse_level = input("Select your translation level (default 2):")
     string_to_shift = str(input_forstring)
     if not input_parse_level:
-        input_parse_level = "2"
+        input_parse_level = "3"
 
-    if input_parse_level not in ["1", "2", "3", "4"]:
+    if input_parse_level not in ["1", "2", "3", "4", "5"]:
         print("Invalid input, defaulting to standard parse (2)")
-        input_parse_level = "2"
+        input_parse_level = "3"
 
 alpha_translation_dict_std = {
     "a": "🇦",
@@ -134,6 +139,229 @@ translation_dict_alt_letters = {
     "z": "🆉"
 }
 
+main_glyph_dict = {
+    r"\blove\b": "❤️",
+    r"\bcoffee\b": "☕",
+    r"\bbook\b": "📚",
+    r"\bcat\b": "🐱",
+    r"\bdog\b": "🐶",
+    r"\bmusic\b": "🎶",
+    r"\bsun\b": "☀️",
+    r"\brainbow\b": "🌈",
+    r"\btree\b": "🌳",
+    r"\bstar\b": "⭐",
+    r"\bphone\b": "📱",
+    r"\bmoney\b": "💰",
+    r"\bghost\b": "👻",
+    r"\bfire\b": "🔥",
+    r"\bparty\b": "🎉",
+    r"\bsleep\b": "😴",
+    r"\bflower\b": "🌸",
+    r"\bgame\b": "🎮",
+    r"\bcar\b": "🚗",
+    r"\bmoon\b": "🌙",
+    r"\bwine\b": "🍷",
+    r"\bpizza\b": "🍕",
+    r"\bheart\b": "💖",
+    r"\bplane\b": "✈️",
+    r"\blaptop\b": "💻",
+    r"\bcloud\b": "☁️",
+    r"\brobot\b": "🤖",
+    r"\bsnow\b": "❄️",
+    r"\bwater\b": "💧",
+    r"\bschool\b": "🏫",
+    r"\bapple\b": "🍎",
+    r"\bturtle\b": "🐢",
+    r"\bbear\b": "🐻",
+    r"\btrain\b": "🚆",
+    r"\bcherry\b": "🍒",
+    r"\bbread\b": "🍞",
+    r"\bclock\b": "⏰",
+    r"\bradio\b": "📻",
+    r"\bshoe\b": "👟",
+    r"\bfrog\b": "🐸",
+    r"\bhome\b": "🏠",
+    r"\bhouse\b": "🏡",
+    r"\bidea\b": "💡",
+    r"\bcake\b": "🍰",
+    r"\bfish\b": "🐟",
+    r"\bfork\b": "🍴",
+    r"\btiger\b": "🐯",
+    r"\bgame\b": "🎲",
+    r"\bbike\b": "🚲",
+    r"\bmilk\b": "🥛",
+    r"\bwolf\b": "🐺",
+    r"\bdoor\b": "🚪",
+    r"\bhike\b": "🥾",
+    r"\bglow\b": "✨",
+    r"\bhand\b": "🤚",
+    r"\bmail\b": "📧",
+    r"\brock\b": "🪨",
+    r"\bsoap\b": "🧼",
+    r"\bhug\b": "🤗",
+    r"\bhat\b": "🎩",
+    r"\bkey\b": "🔑",
+    r"\bbus\b": "🚌",
+    r"\bbat\b": "🦇",
+    r"\bcup\b": "☕",
+    r"\bbed\b": "🛏️",
+    r"\btop\b": "🔝",
+    r"\bice\b": "🧊",
+    r"\brun\b": "🏃‍♂️",
+    r"\bwow\b": "😲",
+    r"\bno\b": "🚫",
+    r"\byes\b": "👍",
+    r"\bjoy\b": "😂",
+    r"\bok\b": "👌",
+    r"\bfun\b": "😄",
+    r"\bfriend\b": "👫",
+    r"\bmovie\b": "🎥",
+    r"\bbirthday\b": "🎂",
+    r"\btime\b": "⌛",
+    r"\bballoon\b": "🎈",
+    r"\btaco\b": "🌮",
+    r"\brose\b": "🌹",
+    r"\bchicken\b": "🐔",
+    r"\bhappy\b": "😊",
+    r"\blaugh\b": "😆",
+    r"\bhorse\b": "🐴",
+    r"\bwhale\b": "🐋",
+    r"\bcamera\b": "📷",
+    r"\bguitar\b": "🎸",
+    r"\bcoin\b": "🪙",
+    r"\bpeach\b": "🍑",
+    r"\bfuel\b": "⛽",
+    r"\bpig\b": "🐷",
+    r"\bearth\b": "🌍",
+    r"\blion\b": "🦁",
+    r"\bfork\b": "🍽️",
+    r"\bmint\b": "🌿",
+    r"\bbag\b": "👜",
+    r"\bwave\b": "🌊",
+    r"\bbee\b": "🐝",
+    r"\bpineapple\b": "🍍",
+    r"\bhand\b": "✋",
+    r"\beye\b": "👁️",
+    r"\bgold\b": "🥇",
+    r"\btv\b": "📺",
+    r"\bchat\b": "💬",
+    r"\bair\b": "💨",
+    r"\bwin\b": "🏆",
+    r"\bsea\b": "🌊"
+}
+
+main_glyph_dict_aggressive = {
+    r"love": "❤️",
+    r"coffee": "☕",
+    r"book": "📚",
+    r"cat": "🐱",
+    r"dog": "🐶",
+    r"music": "🎶",
+    r"sun": "☀️",
+    r"rainbow": "🌈",
+    r"tree": "🌳",
+    r"star": "⭐",
+    r"phone": "📱",
+    r"money": "💰",
+    r"ghost": "👻",
+    r"fire": "🔥",
+    r"party": "🎉",
+    r"sleep": "😴",
+    r"flower": "🌸",
+    r"game": "🎮",
+    r"car": "🚗",
+    r"moon": "🌙",
+    r"wine": "🍷",
+    r"pizza": "🍕",
+    r"heart": "💖",
+    r"plane": "✈️",
+    r"laptop": "💻",
+    r"cloud": "☁️",
+    r"robot": "🤖",
+    r"snow": "❄️",
+    r"water": "💧",
+    r"school": "🏫",
+    r"apple": "🍎",
+    r"turtle": "🐢",
+    r"bear": "🐻",
+    r"train": "🚆",
+    r"cherry": "🍒",
+    r"bread": "🍞",
+    r"clock": "⏰",
+    r"radio": "📻",
+    r"shoe": "👟",
+    r"frog": "🐸",
+    r"home": "🏠",
+    r"house": "🏡",
+    r"idea": "💡",
+    r"cake": "🍰",
+    r"fish": "🐟",
+    r"fork": "🍴",
+    r"tiger": "🐯",
+    r"bike": "🚲",
+    r"milk": "🥛",
+    r"wolf": "🐺",
+    r"door": "🚪",
+    r"hike": "🥾",
+    r"glow": "✨",
+    r"hand": "🤚",
+    r"mail": "📧",
+    r"rock": "🪨",
+    r"soap": "🧼",
+    r"hug": "🤗",
+    r"hat": "🎩",
+    r"key": "🔑",
+    r"bus": "🚌",
+    r"bat": "🦇",
+    r"cup": "☕",
+    r"bed": "🛏️",
+    r"top": "🔝",
+    r"ice": "🧊",
+    r"run": "🏃‍♂️",
+    r"wow": "😲",
+    r"no": "🚫",
+    r"yes": "👍",
+    r"joy": "😂",
+    r"ok": "👌",
+    r"fun": "😄",
+    r"friend": "👫",
+    r"movie": "🎥",
+    r"birthday": "🎂",
+    r"time": "⌛",
+    r"balloon": "🎈",
+    r"taco": "🌮",
+    r"rose": "🌹",
+    r"chicken": "🐔",
+    r"happy": "😊",
+    r"laugh": "😆",
+    r"horse": "🐴",
+    r"whale": "🐋",
+    r"camera": "📷",
+    r"guitar": "🎸",
+    r"coin": "🪙",
+    r"peach": "🍑",
+    r"fuel": "⛽",
+    r"pig": "🐷",
+    r"earth": "🌍",
+    r"lion": "🦁",
+    r"mint": "🌿",
+    r"bag": "👜",
+    r"wave": "🌊",
+    r"bee": "🐝",
+    r"pineapple": "🍍",
+    r"eye": "👁️",
+    r"gold": "🥇",
+    r"tv": "📺",
+    r"chat": "💬",
+    r"air": "💨",
+    r"win": "🏆",
+    r"sea": "🌊"
+}
+
+def apply_glyphs(in_b, out_b, string_in):
+    string_shift = re.sub(in_b, out_b, string_in)
+    return string_shift
+
 def light_parse(string_to_shift):
     for in_a, out_a in alpha_translation_dict_std.items():
         string_to_shift = string_to_shift.replace(in_a, out_a)
@@ -141,7 +369,16 @@ def light_parse(string_to_shift):
         string_to_shift = string_to_shift.replace(in_a, out_a)
     return string_to_shift
 
+def glyph_parse(string_to_shift):
+    for in_a, out_a in main_glyph_dict.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
+    for in_a, out_a in main_glyph_dict_aggressive.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
+    return string_to_shift
+
 def standard_parse(string_to_shift):
+    for in_a, out_a in main_glyph_dict.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
     for in_a, out_a in alpha_translation_dict_std.items():
         string_to_shift = string_to_shift.replace(in_a, out_a)
     for in_a, out_a in translation_dict_digits.items():
@@ -151,6 +388,8 @@ def standard_parse(string_to_shift):
     return string_to_shift
 
 def alternate_parse(string_to_shift):
+    for in_a, out_a in main_glyph_dict.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
     for in_a, out_a in translation_dict_alt_letters.items():
         string_to_shift = string_to_shift.replace(in_a, out_a)
     for in_a, out_a in translation_dict_digits.items():
@@ -160,6 +399,10 @@ def alternate_parse(string_to_shift):
     return string_to_shift
 
 def deep_parse(string_to_shift):
+    for in_a, out_a in main_glyph_dict.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
+    for in_a, out_a in main_glyph_dict_aggressive.items():
+        string_to_shift = apply_glyphs(in_a, out_a, string_to_shift)
     for in_a, out_a in alpha_translation_dict_std.items():
         string_to_shift = string_to_shift.replace(in_a, out_a)
     for in_a, out_a in translation_dict_digits.items():
@@ -171,14 +414,15 @@ def deep_parse(string_to_shift):
 if input_parse_level == "1":
     string_to_shift = light_parse(string_to_shift)
 elif input_parse_level == "2":
-    string_to_shift = standard_parse(string_to_shift)
+    string_to_shift = glyph_parse(string_to_shift)
 elif input_parse_level == "3":
-    string_to_shift = alternate_parse(string_to_shift)
+    string_to_shift = standard_parse(string_to_shift)
 elif input_parse_level == "4":
+    string_to_shift = alternate_parse(string_to_shift)
+elif input_parse_level == "5":
     string_to_shift = deep_parse(string_to_shift)
 
 if interactive_mode == True:
     print(f" > {string_to_shift}")
 else:
     print(string_to_shift)
-
