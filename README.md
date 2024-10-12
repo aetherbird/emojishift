@@ -42,6 +42,25 @@ emojishift supports UNIX/Linux pipes: |.  For instance, to invoke emoji glyphing
 cat foo.txt | emojishift
 ```
 
+If input is not piped, emojishift runs in interactive mode:
+```
+ > emojishift 
+Define Input > dog
+Select your translation level (default 3): 3
+
+
+Translation Level: 
+
+1. Light: Letters and text only
+2. Glyph: Glyph translations only
+3. Standard: Apply glyphs and letters
+4. Alternate: Apply glyphs and alternate unicode
+5. Deep: Apply maximum glyphing
+
+
+ > 🐶
+```
+
 emojishift can also reverse translate, converting emojis to text:
 ```
 cat emoji_filled_file.md | emojishift
