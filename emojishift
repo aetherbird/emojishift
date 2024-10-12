@@ -5,7 +5,9 @@ import argparse
 import re
 
 interactive_mode = False
-input_parse_level = "3"
+reverse_mode = False
+default_parse_level = "3"
+input_parse_level = None
 
 argparser = argparse.ArgumentParser(description="emojishift: translate text to emoji")
 argparser.add_argument(
@@ -28,10 +30,27 @@ argparser.add_argument(
     "-d", "--deep", "-5", action="store_const", const="5", dest="parse_level",
     help="deep: apply maximum glyphing"
 )
+argparser.add_argument(
+    "-r", "--reverse", action="store_true", dest="reverse",
+    help="reverse: translate from emoji to text"
+)
+argparser.add_argument(
+    "-i", "--interactive", action="store_true", dest="interactive",
+    help="interactive mode"
+)
+argparser.add_argument(
+    "-v", "--version", action="version", version="emojishift 0.11"
+)
 
 passedargs = argparser.parse_args()
 if passedargs.parse_level:
     input_parse_level = passedargs.parse_level
+
+if passedargs.reverse:
+    reverse_mode = True
+
+if passedargs.interactive:
+    interactive_mode = True
 
 # isatty will return False if input is piped in
 if sys.stdin.isatty():
@@ -41,15 +60,14 @@ else:
 
 if interactive_mode == True:
     input_forstring = input("Define Input > ")
-    print(f"\n\nTranslation Level: \n\n1. Light: Letters and text only\n2. Glyph: Glyph translations only\n3. Standard: Apply glyphs and letters\n4. Alternate: Apply glyphs and alternate unicode\n5. Deep: Apply maximum glyphing\n\n")
-    input_parse_level = input("Select your translation level (default 2):")
-    string_to_shift = str(input_forstring)
     if not input_parse_level:
-        input_parse_level = "3"
+        input_parse_level = input(f"Select your translation level (default {default_parse_level}): ")
+        print(f"\n\nTranslation Level: \n\n1. Light: Letters and text only\n2. Glyph: Glyph translations only\n3. Standard: Apply glyphs and letters\n4. Alternate: Apply glyphs and alternate unicode\n5. Deep: Apply maximum glyphing\n\n")
+    string_to_shift = str(input_forstring)
 
     if input_parse_level not in ["1", "2", "3", "4", "5"]:
-        print("Invalid input, defaulting to standard parse (2)")
-        input_parse_level = "3"
+        print(f"Invalid input, defaulting to standard parse ({default_parse_level})\n")
+        input_parse_level = default_parse_level
 
 alpha_translation_dict_std = {
     "a": "🇦",
