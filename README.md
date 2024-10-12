@@ -4,7 +4,8 @@
 
 ## Prerequisites
 
-- <a href="https://github.com/13rac1/twemoji-color-font">SVG-OpenType</a> or equivalent (standard on most current Linux distrobutions)
+Prerequisite packages are already standard on most current Linux distributions:
+- <a href="https://github.com/13rac1/twemoji-color-font">SVG-OpenType</a> (or equivalent)
 - <a href="https://github.com/python/cpython">Python 3.6+</a>
 
 ## Installation
