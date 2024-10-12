@@ -63,7 +63,7 @@ Translation Level:
 
 emojishift can also reverse translate, converting emojis to text:
 ```
-cat emoji_filled_file.md | emojishift
+cat emoji_filled_file.md | emojishift -r
 ```
 
 <img src="./emojishift_examples.png">
